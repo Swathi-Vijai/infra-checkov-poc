@@ -72,7 +72,7 @@ stages:
        
         
         
-          
+        environment: dev
         strategy:
             runOnce:
                 deploy:
