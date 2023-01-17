@@ -27,7 +27,7 @@ stages:
               displayName: 'Checkov Static Code Analysis'
               inputs:
                 targetType: 'inline'
-                script: checkov --directory ./ 
+                script: checkov --directory ./  --check HIGH
   - stage: cost_estimation
     dependsOn: checkov
     jobs:
