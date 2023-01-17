@@ -27,8 +27,7 @@ stages:
               displayName: 'Checkov Static Code Analysis'
               inputs:
                 targetType: 'inline'
-                #script: checkov --directory ./  --check HIGH --bc-api-key  $(API-2)
-                script: checkov --directory ./  --check HIGH --bc-api-key  $(API-2) --skip-check CKV2_AZURE_1 
+                script: checkov --directory ./
   - stage: cost_estimation
     dependsOn: checkov
     jobs:
