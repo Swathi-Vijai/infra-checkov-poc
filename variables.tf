@@ -17,7 +17,7 @@ variable "storage_account_name" {
 
 variable "tags" {
   type = object({
-    created_by       = list
+    created_by       = string
     created_for      = string
     
   })
