@@ -1,0 +1,119 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+
+pr:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+
+
+stages:
+  - stage: checkov
+    jobs:
+        - job: compliance
+          displayName: 'Run checkov for compliance'
+          pool:
+            vmImage: 'ubuntu-latest'
+
+          steps:
+            - task: Bash@3
+              inputs:
+                targetType: 'inline'
+                script: 'pip3 install checkov'
+            - task: Bash@3
+              displayName: 'Checkov Static Code Analysis'
+              inputs:
+                targetType: 'inline'
+                script: checkov --directory ./ --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml
+            - task: PublishTestResults@2
+              displayName: 'Publish checkov Test Results'
+              condition: succeededOrFailed()
+              inputs:
+                testResultsFormat: 'JUnit'
+                testResultsFiles: 'checkov-report.xml'
+                searchFolder: '$(System.DefaultWorkingDirectory)'  
+              #continueOnError: true
+  - stage: cost_estimation
+    dependsOn: checkov
+    jobs:
+        - job: 
+          displayName: 'infracost'
+          pool:
+            vmImage: 'ubuntu-latest'
+
+          steps:
+            - task: InfracostSetup@1
+              inputs:
+                apiKey: $(api_key)
+                version: '0.10.x'
+
+            - bash: |
+                infracost breakdown --path="." \
+                                      --format=json \
+                                      --out-file=/tmp/infracost-base.json 
+              displayName: Generate Infracost cost estimate baseline
+
+            - task: PublishBuildArtifacts@1
+              inputs:
+                pathtoPublish: /tmp/infracost-base.json
+                artifactName: infracost-base-json
+
+  
+  
+  - stage: deploy
+    dependsOn: checkov
+    jobs:
+      - deployment: Deploy
+        variables:
+        - group: Terraform-ic
+       
+        
+        
+          
+        strategy:
+            runOnce:
+                deploy:
+                   steps:
+                    - checkout: self
+                    
+                    - task: FileTransform@1
+                      inputs:
+                          folderPath: '$(System.DefaultWorkingDirectory)'
+                          fileType: 'json'
+                          targetFiles: 'parameter.json'
+                    - task: TerraformInstaller@0
+                      inputs:
+                              terraformVersion: 'latest'
+                    - task: TerraformTaskV3@3
+                      inputs:
+                              provider: 'azurerm'
+                              command: 'init'
+                              backendServiceArm: 'az-asgmts'
+                              backendAzureRmResourceGroupName: 'Devops-RG'
+                              backendAzureRmStorageAccountName: 'devopstrainingstorage'
+                              backendAzureRmContainerName: 'swathi-tfstate-asgmt'
+                              backendAzureRmKey: 'terraform.tfstate'
+                    - task: TerraformTaskV3@3
+                      inputs:
+                           provider: 'azurerm'
+                           command: 'plan'
+                           commandOptions: '--var-file="$(System.DefaultWorkingDirectory)/parameter.json"'
+                           environmentServiceNameAzureRM: 'az-asgmts'
+                    - task: TerraformTaskV3@3
+                      inputs:
+                             provider: 'azurerm'
+                             command: 'apply'
+                             commandOptions: '--var-file="$(System.DefaultWorkingDirectory)/parameter.json"'
+                             environmentServiceNameAzureRM: 'az-asgmts'
+                    - task: TerraformTaskV3@3
+                      inputs:
+                        provider: 'azurerm'
+                        command: 'destroy'
+                        commandOptions: '--var-file="$(System.DefaultWorkingDirectory)/parameter.json"'
+                        environmentServiceNameAzureRM: 'az-asgmts'
+
+  
+
