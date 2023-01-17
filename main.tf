@@ -5,7 +5,7 @@ resource "azurerm_storage_account" "storage_account" {
   account_tier             = "Standard"
   account_replication_type = "LRS"
   public_network_access_enabled = false
-  account_kind             = "StorageV2"
+  account_kind             = "BlobStorage"
   
   tags = var.tags 
 }
