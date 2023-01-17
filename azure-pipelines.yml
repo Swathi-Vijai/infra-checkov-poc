@@ -122,12 +122,12 @@ stages:
                              command: 'apply'
                              commandOptions: '--var-file="$(System.DefaultWorkingDirectory)/parameter.json"'
                              environmentServiceNameAzureRM: 'az-asgmts'
-                    # - task: TerraformTaskV3@3
-                    #   inputs:
-                    #     provider: 'azurerm'
-                    #     command: 'destroy'
-                    #     commandOptions: '--var-file="$(System.DefaultWorkingDirectory)/parameter.json"'
-                    #     environmentServiceNameAzureRM: 'az-asgmts'
+                    - task: TerraformTaskV3@3
+                      inputs:
+                        provider: 'azurerm'
+                        command: 'destroy'
+                        commandOptions: '--var-file="$(System.DefaultWorkingDirectory)/parameter.json"'
+                        environmentServiceNameAzureRM: 'az-asgmts'
 
   
 
