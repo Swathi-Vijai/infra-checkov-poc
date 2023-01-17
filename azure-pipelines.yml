@@ -42,15 +42,11 @@ stages:
                 apiKey: $(api_key)
                 version: '0.10.x'
 
-            
-
             - bash: |
                 infracost breakdown --path="." \
                                       --format=json \
                                       --out-file=/tmp/infracost-base.json 
               displayName: Generate Infracost cost estimate baseline
-          
-            
 
             - task: PublishBuildArtifacts@1
               inputs:
@@ -65,9 +61,7 @@ stages:
       - deployment: Deploy
         variables:
         - group: Terraform-ic
-       
-        
-        
+
         environment: dev
         strategy:
             runOnce:
