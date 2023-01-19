@@ -27,7 +27,7 @@ stages:
               displayName: 'Checkov Static Code Analysis'
               inputs:
                 targetType: 'inline'
-                script: checkov --directory ./ --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml
+                script: checkov --directory ./ --hard-fail-on HIGH --bc-api-key  $(API-KEY-2) --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml
             - task: PublishTestResults@2
               displayName: 'Publish checkov Test Results'
               condition: succeededOrFailed()
