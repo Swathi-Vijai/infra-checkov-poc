@@ -61,8 +61,7 @@ stages:
             - task: DownloadBuildArtifacts@1
               inputs:
                 buildType: 'current'
-                downloadType: 'single'
-                artifactName: 'checkov-result'
+                downloadType: 'specific'
                 downloadPath: '$(System.ArtifactsDirectory)'
             
             
