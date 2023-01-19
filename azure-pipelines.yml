@@ -32,7 +32,9 @@ stages:
               displayName: 'Checkov Static Code Analysis'
               inputs:
                 targetType: 'inline'
-                script: checkov --directory ./ --hard-fail-on HIGH --bc-api-key  $(API-KEY-2) --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml
+                script: 
+                 'checkov --directory ./ --hard-fail-on HIGH --bc-api-key  $(API-KEY-2) --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml'
+                 "checkov --directory ./ --hard-fail-on HIGH --bc-api-key  $(API-KEY-2) --output json > $(System.DefaultWorkingDirectory)/checkov-report.json"
             - task: PublishTestResults@2
               displayName: 'Publish checkov Test Results'
               condition: succeededOrFailed()
@@ -41,7 +43,7 @@ stages:
                 testResultsFiles: 'checkov-report.xml'
                 searchFolder: '$(System.DefaultWorkingDirectory)'
             - bash: |
-                infracost comment github --path=$(System.DefaultWorkingDirectory)/checkov-report.xml \
+                infracost comment github --path=$(System.DefaultWorkingDirectory)/checkov-report.json \
                                   --repo=$(Build.Repository.Name) \
                                   --pull-request=$(System.PullRequest.PullRequestNumber) \
                                   --github-token=$(GITHUB-TOKEN) \
