@@ -28,7 +28,17 @@ stages:
               inputs:
                 targetType: 'inline'
                 #script: checkov --directory ./  --check HIGH --bc-api-key  $(API-2)
-                script: checkov --directory ./ --hard-fail-on HIGH --bc-api-key  $(API-KEY-2) --skip-check CKV2_AZURE_1
+                #script: checkov --directory ./ --hard-fail-on HIGH --bc-api-key  $(API-KEY-2)
+                script: |
+                  'checkov --directory ./ --hard-fail-on HIGH --bc-api-key  $(API-KEY-2) --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml'
+            - task: PublishTestResults@2
+              displayName: 'Publish checkov Test Results'
+              condition: succeededOrFailed()
+              inputs:
+                testResultsFormat: 'JUnit'
+                testResultsFiles: 'checkov-report.xml'
+                searchFolder: '$(System.DefaultWorkingDirectory)'
+ 
   - stage: cost_estimation
     dependsOn: checkov
     jobs:
