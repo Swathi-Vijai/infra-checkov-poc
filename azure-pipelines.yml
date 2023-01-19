@@ -52,17 +52,10 @@ stages:
                 testResultsFiles: 'checkov-report.xml'
                 searchFolder: '$(System.DefaultWorkingDirectory)'
             
-            - task: CopyPublishBuildArtifacts@1
+            - task: PublishBuildArtifacts@1
               inputs:
-                CopyRoot: '$(Agent.BuildDirectory)'
-                Contents: '$(System.DefaultWorkingDirectory)/checkov-report.json'
-                ArtifactName: 'checkov-result'
-                ArtifactType: 'Container'
-            - task: DownloadBuildArtifacts@1
-              inputs:
-                buildType: 'current'
-                downloadType: 'specific'
-                downloadPath: '$(System.ArtifactsDirectory)'
+                pathtoPublish: $(System.DefaultWorkingDirectory)/checkov-report.json
+                artifactName: infracost-base-json
             
             
  
