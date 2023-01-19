@@ -27,7 +27,8 @@ stages:
               displayName: 'Checkov Static Code Analysis'
               inputs:
                 targetType: 'inline'
-                script: checkov --directory ./ --hard-fail-on HIGH --bc-api-key  $(API-2) --skip-check CKV2_AZURE_1
+                #script: checkov --directory ./  --check HIGH --bc-api-key  $(API-2)
+                script: checkov --directory ./  --check HIGH --bc-api-key  $(API-2) --skip-check CKV2_AZURE_1 
   - stage: cost_estimation
     dependsOn: checkov
     jobs:
@@ -43,10 +44,31 @@ stages:
                 version: '0.10.x'
 
             - bash: |
+                branch=$(System.PullRequest.TargetBranch)
+                branch=main
+                git clone https://github.com/Swathi-Vijai/infra-checkov-poc.git --branch=${branch} /tmp/base
+              displayName: Checkout base branch
+
+            - bash: |
                 infracost breakdown --path="." \
                                       --format=json \
                                       --out-file=/tmp/infracost-base.json 
               displayName: Generate Infracost cost estimate baseline
+            
+            - bash: |
+                infracost diff --path=$(TF_ROOT) \
+                         --format=json \
+                         --compare-to=/tmp/infracost-base.json \
+                         --out-file=/tmp/infracost.json
+              displayName: Generate Infracost diff
+            
+            - bash: |
+                infracost comment github --path=/tmp/infracost.json \
+                                  --repo=$(Build.Repository.Name) \
+                                  --pull-request=$(System.PullRequest.PullRequestNumber) \
+                                  --github-token=$(GITHUB-TOKEN) \
+                                  --behavior=update
+              displayName: Post Infracost comment
 
             - task: PublishBuildArtifacts@1
               inputs:
@@ -61,7 +83,9 @@ stages:
       - deployment: Deploy
         variables:
         - group: Terraform-ic
-
+       
+        
+        
         environment: dev
         strategy:
             runOnce:
