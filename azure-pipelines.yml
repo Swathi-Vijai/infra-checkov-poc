@@ -35,15 +35,7 @@ stages:
                 script: |
                   checkov --directory ./ --hard-fail-on HIGH --bc-api-key  $(API-KEY-2) --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml
                   checkov --directory ./ --hard-fail-on HIGH --bc-api-key  $(API-KEY-2) --output json > $(System.DefaultWorkingDirectory)/checkov-report.json
-            - task: Bash@3
-              inputs:
-                targetType: 'inline'
-                script: |
-                  # Write your commands here
-                  
-                  echo 'Hello world'
-                  echo 'sai'
-                  cat checkov-report.json
+            
             - task: PublishTestResults@2
               displayName: 'Publish checkov Test Results'
               condition: succeededOrFailed()
@@ -76,10 +68,7 @@ stages:
                 repositoryName: '$(Build.Repository.Name)'
                 id: '$(System.PullRequest.PullRequestNumber)'
                 comment: '$(GhComment)'
-            
-                  
-            
-            
+
  
   - stage: cost_estimation
     dependsOn: checkov
