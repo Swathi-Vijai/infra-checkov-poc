@@ -47,7 +47,7 @@ stages:
             - task: PublishBuildArtifacts@1
               inputs:
                 pathtoPublish: $(System.DefaultWorkingDirectory)/checkov-report.json
-                artifactName: infracost-base-json
+                artifactName: Checkov-Report
             
             - task: PythonScript@0
               inputs:
