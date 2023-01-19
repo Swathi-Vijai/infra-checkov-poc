@@ -18,7 +18,7 @@ locals {
 
 }
 
-resource "azurerm_resource_group" "sai-rg" {
+resource "azurerm_resource_group" "rg" {
   name     = local.resource_group_name
   location = local.location
 }
@@ -31,7 +31,7 @@ resource "azurerm_virtual_network" "sai-network" {
   address_space       = ["10.0.0.0/16"]
   dns_servers         = ["10.0.0.4", "10.0.0.5"]
   depends_on = [
-    azurerm_resource_group.sai-rg
+    azurerm_resource_group.rg
   ]
 }
 
@@ -45,7 +45,7 @@ resource "azurerm_subnet" "SubnetA" {
   ]
 }
 
-resource "azurerm_network_interface" "sai-interface" {
+resource "azurerm_network_interface" "interface" {
   name                = "sai-interface"
   location            = local.location
   resource_group_name = local.resource_group_name
@@ -67,7 +67,7 @@ resource "azurerm_network_interface" "sai-interface" {
 #   location            = local.location
 #   allocation_method   = "Static"
 #   depends_on = [
-#     azurerm_resource_group.sai-rg
+#     azurerm_resource_group.rg
 #   ]
 # }
 
@@ -87,7 +87,7 @@ resource "azurerm_network_interface" "sai-interface" {
 #     destination_address_prefix = "*"
 #   }
 #   depends_on = [
-#     azurerm_resource_group.sai-rg
+#     azurerm_resource_group.rg
 #   ]
 # }
 
@@ -104,7 +104,7 @@ resource "azurerm_windows_virtual_machine" "sai-vm" {
   admin_username      = "sai-ch"
   admin_password      = "Azuresai@123"
   network_interface_ids = [
-    azurerm_network_interface.sai-interface.id,
+    azurerm_network_interface.interface.id,
   ]
 
   os_disk {
@@ -119,7 +119,7 @@ resource "azurerm_windows_virtual_machine" "sai-vm" {
     version   = "latest"
   }
   depends_on = [
-    azurerm_resource_group.sai-rg,
-    azurerm_network_interface.sai-interface,
+    azurerm_resource_group.rg,
+    azurerm_network_interface.interface,
   ]
 }
