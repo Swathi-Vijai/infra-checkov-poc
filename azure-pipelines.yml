@@ -19,6 +19,11 @@ stages:
             vmImage: 'ubuntu-latest'
 
           steps:
+            - task: InfracostSetup@1
+              displayName: "InfracostSetup"
+              inputs:
+                apiKey: $(api_key)
+                version: '0.10.x'
             - task: Bash@3
               inputs:
                 targetType: 'inline'
@@ -27,8 +32,22 @@ stages:
               displayName: 'Checkov Static Code Analysis'
               inputs:
                 targetType: 'inline'
-                #script: checkov --directory ./  --check HIGH --bc-api-key  $(API-2)
-                script: checkov --directory ./ --hard-fail-on HIGH --bc-api-key  $(API-KEY-2) --skip-check CKV2_AZURE_1
+                script: checkov --directory ./ --hard-fail-on HIGH --bc-api-key  $(API-KEY-2) --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml
+            - task: PublishTestResults@2
+              displayName: 'Publish checkov Test Results'
+              condition: succeededOrFailed()
+              inputs:
+                testResultsFormat: 'JUnit'
+                testResultsFiles: 'checkov-report.xml'
+                searchFolder: '$(System.DefaultWorkingDirectory)'
+            - bash: |
+                infracost comment github --path=$(System.DefaultWorkingDirectory)/checkov-report.xml \
+                                  --repo=$(Build.Repository.Name) \
+                                  --pull-request=$(System.PullRequest.PullRequestNumber) \
+                                  --github-token=$(GITHUB-TOKEN) \
+                                  --behavior=update
+              displayName: Post Infracost comment
+ 
   - stage: cost_estimation
     dependsOn: checkov
     jobs:
@@ -77,57 +96,5 @@ stages:
 
   
   
-  - stage: deploy
-    dependsOn: cost_estimation
-    jobs:
-      - deployment: Deploy
-        variables:
-        - group: Terraform-ic
-       
-        
-        
-        environment: dev
-        strategy:
-            runOnce:
-                deploy:
-                   steps:
-                    - checkout: self
-                    
-                    - task: FileTransform@1
-                      inputs:
-                          folderPath: '$(System.DefaultWorkingDirectory)'
-                          fileType: 'json'
-                          targetFiles: 'parameter.json'
-                    - task: TerraformInstaller@0
-                      inputs:
-                              terraformVersion: 'latest'
-                    - task: TerraformTaskV3@3
-                      inputs:
-                              provider: 'azurerm'
-                              command: 'init'
-                              backendServiceArm: 'az-asgmts'
-                              backendAzureRmResourceGroupName: 'Devops-RG'
-                              backendAzureRmStorageAccountName: 'devopstrainingstorage'
-                              backendAzureRmContainerName: 'swathi-tfstate-asgmt'
-                              backendAzureRmKey: 'terraform.tfstate'
-                    - task: TerraformTaskV3@3
-                      inputs:
-                           provider: 'azurerm'
-                           command: 'plan'
-                           commandOptions: '--var-file="$(System.DefaultWorkingDirectory)/parameter.json"'
-                           environmentServiceNameAzureRM: 'az-asgmts'
-                    - task: TerraformTaskV3@3
-                      inputs:
-                             provider: 'azurerm'
-                             command: 'apply'
-                             commandOptions: '--var-file="$(System.DefaultWorkingDirectory)/parameter.json"'
-                             environmentServiceNameAzureRM: 'az-asgmts'
-                    - task: TerraformTaskV3@3
-                      inputs:
-                        provider: 'azurerm'
-                        command: 'destroy'
-                        commandOptions: '--var-file="$(System.DefaultWorkingDirectory)/parameter.json"'
-                        environmentServiceNameAzureRM: 'az-asgmts'
-
   
 
