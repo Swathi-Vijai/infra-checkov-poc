@@ -123,3 +123,7 @@ resource "azurerm_windows_virtual_machine" "sai-vm" {
     azurerm_network_interface.interface,
   ]
 }
+
+
+
+
