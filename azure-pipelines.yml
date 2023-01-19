@@ -48,7 +48,6 @@ stages:
                 branch=main
                 git clone https://github.com/Swathi-Vijai/infra-checkov-poc.git --branch=${branch} /tmp/base
               displayName: Checkout base branch
-
             - bash: |
                 infracost breakdown --path="." \
                                       --format=json \
@@ -69,7 +68,6 @@ stages:
                                   --github-token=$(GITHUB-TOKEN) \
                                   --behavior=update
               displayName: Post Infracost comment
-
             - task: PublishBuildArtifacts@1
               inputs:
                 pathtoPublish: /tmp/infracost-base.json
@@ -128,6 +126,3 @@ stages:
                         command: 'destroy'
                         commandOptions: '--var-file="$(System.DefaultWorkingDirectory)/parameter.json"'
                         environmentServiceNameAzureRM: 'az-asgmts'
-
-  
-
