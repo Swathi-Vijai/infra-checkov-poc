@@ -43,6 +43,7 @@ stages:
                   
                   echo 'Hello world'
                   echo 'sai'
+                  cat checkov-report.json
             - task: PublishTestResults@2
               displayName: 'Publish checkov Test Results'
               condition: succeededOrFailed()
