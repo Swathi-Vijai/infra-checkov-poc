@@ -56,6 +56,15 @@ stages:
               inputs:
                 pathtoPublish: $(System.DefaultWorkingDirectory)/checkov-report.json
                 artifactName: infracost-base-json
+            - task: PythonScript@0
+              inputs:
+                scriptSource: 'inline'
+                script: |
+                  import json
+                  
+                  with open('checkov-report.json') as f:
+                      data = json.load(f)
+                      print(data[0]["summary"])
             
             
  
