@@ -62,17 +62,20 @@ stages:
                 scriptSource: 'inline'
                 script: |
                   import json
-                  import pull_request
                   
                   with open('checkov-report.json') as f:
                       data = json.load(f)
                       value==(data[0]["summary"])
-                  comment=value
-                  msg = pull_request.Message()
-                  result = msg.add(comment=comment)
-                  if result is False:
-                      print("Sending message failed")
+                      print(f"##vso[task.setvariable variable=GhComment;] {value}")
                 failOnStderr: true
+            
+            - task: GitHubComment@0
+              inputs:
+                gitHubConnection: 'github.com_checkov'
+                repositoryName: '$(Build.Repository.Name)'
+                id: '$(System.PullRequest.PullRequestNumber)'
+                comment: '$(GhComment)'
+            
                   
             
             
