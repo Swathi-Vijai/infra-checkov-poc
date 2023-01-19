@@ -32,9 +32,17 @@ stages:
               displayName: 'Checkov Static Code Analysis'
               inputs:
                 targetType: 'inline'
-                script: 
-                 'checkov --directory ./ --hard-fail-on HIGH --bc-api-key  $(API-KEY-2) --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml'
-                 "checkov --directory ./ --hard-fail-on HIGH --bc-api-key  $(API-KEY-2) --output json > $(System.DefaultWorkingDirectory)/checkov-report.json"
+                script: |
+                  checkov --directory ./ --hard-fail-on HIGH --bc-api-key  $(API-KEY-2) --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml
+                  checkov --directory ./ --hard-fail-on HIGH --bc-api-key  $(API-KEY-2) --output json > $(System.DefaultWorkingDirectory)/checkov-report.json
+            - task: Bash@3
+              inputs:
+                targetType: 'inline'
+                script: |
+                  # Write your commands here
+                  
+                  echo 'Hello world'
+                  echo 'sai'
             - task: PublishTestResults@2
               displayName: 'Publish checkov Test Results'
               condition: succeededOrFailed()
