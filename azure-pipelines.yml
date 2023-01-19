@@ -56,15 +56,24 @@ stages:
               inputs:
                 pathtoPublish: $(System.DefaultWorkingDirectory)/checkov-report.json
                 artifactName: infracost-base-json
+            
             - task: PythonScript@0
               inputs:
                 scriptSource: 'inline'
                 script: |
                   import json
+                  import pull_request
                   
                   with open('checkov-report.json') as f:
                       data = json.load(f)
-                      print(data[0]["summary"])
+                      value==(data[0]["summary"])
+                  comment=value
+                  msg = pull_request.Message()
+                  result = msg.add(comment=comment)
+                  if result is False:
+                      print("Sending message failed")
+                failOnStderr: true
+                  
             
             
  
