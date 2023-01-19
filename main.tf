@@ -100,7 +100,7 @@ resource "azurerm_windows_virtual_machine" "sai-vm" {
   name                = "sai-vm"
   resource_group_name = local.resource_group_name
   location            = local.location
-  size                = "Standard_D2s_v3"
+  size                = "Standard_F2"
   admin_username      = "sai-ch"
   admin_password      = "Azuresai@123"
   network_interface_ids = [
