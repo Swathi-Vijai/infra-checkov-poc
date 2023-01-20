@@ -19,11 +19,7 @@ stages:
             vmImage: 'ubuntu-latest'
 
           steps:
-            - task: InfracostSetup@1
-              displayName: "InfracostSetup"
-              inputs:
-                apiKey: $(api_key)
-                version: '0.10.x'
+            
             - task: Bash@3
               inputs:
                 targetType: 'inline'
@@ -47,12 +43,18 @@ stages:
             - task: PublishBuildArtifacts@1
               inputs:
                 pathtoPublish: $(System.DefaultWorkingDirectory)/checkov-report.json
-                artifactName: infracost-base-json
+                artifactName: Checkov-Report
+            
+            - task: Bash@3
+              inputs:
+                targetType: 'inline'
+                script: 'pip install pandas'
             
             - task: PythonScript@0
               inputs:
                 scriptSource: 'inline'
                 script: |
+                  pip install pandas
                   import json
                   import pandas as pd
                   with open('checkov-report.json') as f:
