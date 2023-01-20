@@ -54,53 +54,54 @@ resource "azurerm_network_interface" "interface" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.SubnetA.id
     private_ip_address_allocation = "Dynamic"
-    #public_ip_address_id = azurerm_public_ip.ip.id
+    public_ip_address_id = azurerm_public_ip.ip.id
   }
   depends_on = [
     azurerm_subnet.SubnetA
   ]
 }
 
-# resource "azurerm_public_ip" "ip" {
-#   name                = "sai-PublicIp"
-#   resource_group_name = local.resource_group_name
-#   location            = local.location
-#   allocation_method   = "Static"
-#   depends_on = [
-#     azurerm_resource_group.rg
-#   ]
-# }
+resource "azurerm_public_ip" "ip" {
+  name                = "sai-PublicIp"
+  resource_group_name = local.resource_group_name
+  location            = local.location
+  allocation_method   = "Static"
+  depends_on = [
+    azurerm_resource_group.rg
+  ]
+}
 
-# resource "azurerm_network_security_group" "sai-nsg" {
-#   name                = "sai-nsg"
-#   location            = local.location
-#   resource_group_name = local.resource_group_name
-#   security_rule {
-#     name                       = "AllowRDP"
-#     priority                   = 300
-#     direction                  = "Inbound"
-#     access                     = "Allow"
-#     protocol                   = "Tcp"
-#     source_port_range          = "*"
-#     destination_port_range     = "3389"
-#     source_address_prefix      = "*"
-#     destination_address_prefix = "*"
-#   }
-#   depends_on = [
-#     azurerm_resource_group.rg
-#   ]
-# }
+resource "azurerm_network_security_group" "sai-nsg" {
+  name                = "sai-nsg"
+  location            = local.location
+  resource_group_name = local.resource_group_name
+  security_rule {
+    name                       = "AllowRDP"
+    priority                   = 300
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "3389"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+  depends_on = [
+    azurerm_resource_group.rg
+  ]
+}
 
-# resource "azurerm_subnet_network_security_group_association" "sai-nsg-association" {
-#   subnet_id                 = azurerm_subnet.SubnetA.id
-#   network_security_group_id = azurerm_network_security_group.sai-nsg.id
-# }
+resource "azurerm_subnet_network_security_group_association" "sai-nsg-association" {
+  subnet_id                 = azurerm_subnet.SubnetA.id
+  network_security_group_id = azurerm_network_security_group.sai-nsg.id
+}
 
 resource "azurerm_windows_virtual_machine" "sai-vm" {
   name                = "sai-vm"
   resource_group_name = local.resource_group_name
   location            = local.location
   size                = "Standard_F2"
+  allow_extension_operations = false
   admin_username      = "sai-ch"
   admin_password      = "Azuresai@123"
   network_interface_ids = [
