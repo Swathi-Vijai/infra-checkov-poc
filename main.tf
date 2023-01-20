@@ -1,3 +1,7 @@
+# resource "azurerm_resource_group" "appgrp" {
+#   name     = local.resource_group_name
+#   location = local.location  
+# }
 terraform {
   required_providers {
     azurerm = {
@@ -100,7 +104,7 @@ resource "azurerm_windows_virtual_machine" "sai-vm" {
   name                = "sai-vm"
   resource_group_name = local.resource_group_name
   location            = local.location
-  size                = "Standard_F2"
+  size                = "Standard_D2s_v3"
   allow_extension_operations = false
   admin_username      = "sai-ch"
   admin_password      = "Azuresai@123"
@@ -124,7 +128,4 @@ resource "azurerm_windows_virtual_machine" "sai-vm" {
     azurerm_network_interface.interface,
   ]
 }
-
-
-
 
