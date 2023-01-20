@@ -74,7 +74,7 @@ stages:
                   
                   with open('checkov-report.json') as f:
                       data = json.load(f)
-                      res = line + line_indicator
+                      res = line_indicator
                       for i in range(len(data)):
                           res = res + str('Check Type:     ' + data[i]["check_type"]).center(120)
                           
