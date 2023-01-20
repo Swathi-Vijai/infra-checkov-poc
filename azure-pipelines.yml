@@ -71,6 +71,7 @@ stages:
                   import json
                   line = "-"*125
                   line_indicator = '%0D%0A'
+                  
                   with open('checkov-report.json') as f:
                       data = json.load(f)
                       res = line + line_indicator
@@ -78,6 +79,14 @@ stages:
                           res = res + str('Check Type:     ' + data[i]["check_type"]).center(120)
                           
                           xdata = data[i]["summary"]
+
+                          #Delete If didnt works
+                          # For If chekov fails cancel PR
+                          for i in xdata:
+                            if i == 'failed':
+                              failed = xdata[i]
+                          print('failed number of cases =' + failed)
+                          #End
                           
                           res = res + line_indicator+ line + line_indicator + '|'.join(map(lambda y: y.center(20), xdata.keys())
                                               ) + line_indicator + line + line_indicator + '|'.join(map(lambda y: y.center(20),map(str,xdata.values()))) + line_indicator + line
