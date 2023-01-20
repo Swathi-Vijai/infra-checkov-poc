@@ -19,11 +19,7 @@ stages:
             vmImage: 'ubuntu-latest'
 
           steps:
-            - task: InfracostSetup@1
-              displayName: "InfracostSetup"
-              inputs:
-                apiKey: $(api_key)
-                version: '0.10.x'
+            
             - task: Bash@3
               inputs:
                 targetType: 'inline'
