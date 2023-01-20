@@ -50,19 +50,55 @@ stages:
                 targetType: 'inline'
                 script: 'pip install pandas'
             
+            # - task: PythonScript@0
+            #   inputs:
+            #     scriptSource: 'inline'
+            #     script: |
+            #       import json
+            #       import pandas as pd
+            #       with open('checkov-report.json') as f:
+            #           data = json.load(f)
+            #           value=(data[0]["summary"])
+            #           df = pd.read_json(value)
+            #           print(df)
+            #           print(f"##vso[task.setvariable variable=GhComment;]{value}")
+            #     failOnStderr: true
+              
             - task: PythonScript@0
               inputs:
                 scriptSource: 'inline'
                 script: |
                   import json
-                  import pandas as pd
-                  with open('checkov-report.json') as f:
+                  line = "-"*125
+                  with open('data.json') as f:
                       data = json.load(f)
-                      value=(data[0]["summary"])
-                      df = pd.read_json(value)
-                      print(df)
-                      print(f"##vso[task.setvariable variable=GhComment;]{value}")
-                failOnStderr: true
+                      for i in range(len(data)):
+                          res = line + '\n'
+                          res = res + str('Check Type:     ' + data[i]["check_type"]).center(120)
+                          
+                          xdata = data[i]["summary"]
+                          
+                          res = res + '\n'+ line + '\n' + '|'.join(map(lambda y: y.center(20), xdata.keys())
+                                              ) + '\n' + line + '\n' + '|'.join(map(lambda y: y.center(20),map(str,xdata.values()))) + '\n' + line
+                          #print(res)
+                          check_results = data[i]["results"]
+                          for _ in check_results:
+                              #spilts_= 
+                              name = " ".join(map(lambda z : z.capitalize(),_.split('_')))
+                              #print(name)
+                              res = res + '\n' + name + ':'
+                              if _ != "parsing_errors":
+                  
+                                  for j in range(len(check_results[_])):
+                                      
+                                      res= res + '\n' + (check_results[_][j]["check_name"])
+                                  res = res +'\n'+line
+                              else:
+                                  for j in range(len(check_results[_])):
+                                      
+                                      res= res + '\n' + (check_results[_][j])
+                                  res = res +'\n'+line
+                          print(f"##vso[task.setvariable variable=GhComment;]{res}")
               
             
             - task: GitHubComment@0
