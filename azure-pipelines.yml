@@ -73,8 +73,8 @@ stages:
                   line_indicator = 'varNewLineHere'
                   with open('checkov-report.json') as f:
                       data = json.load(f)
+                      res = line + line_indicator
                       for i in range(len(data)):
-                          res = line + line_indicator
                           res = res + str('Check Type:     ' + data[i]["check_type"]).center(120)
                           
                           xdata = data[i]["summary"]
