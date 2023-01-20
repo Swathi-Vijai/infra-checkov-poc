@@ -64,52 +64,98 @@ stages:
             #           print(f"##vso[task.setvariable variable=GhComment;]{value}")
             #     failOnStderr: true
               
+            # - task: PythonScript@0
+            #   inputs:
+            #     scriptSource: 'inline'
+            #     script: |
+            #       import json
+            #       line = "-"*125
+            #       line_indicator = '%0D%0A'
+                  
+            #       with open('checkov-report.json') as f:
+            #           data = json.load(f)
+            #           res = line_indicator
+            #           for i in range(len(data)):
+            #               res = res + str('Check Type:     ' + data[i]["check_type"]).center(120)
+                          
+            #               xdata = data[i]["summary"]
+
+            #               #Delete If didnt works
+            #               # For If chekov fails cancel PR
+            #               print(xdata)
+            #               #End
+                          
+            #               res = res + line_indicator+ line + line_indicator + '|'.join(map(lambda y: y.center(20), xdata.keys())
+            #                                   ) + line_indicator + line + line_indicator + '|'.join(map(lambda y: y.center(20),map(str,xdata.values()))) + line_indicator + line
+            #               #print(res)
+            #               check_results = data[i]["results"]
+            #               for _ in check_results:
+            #                   #spilts_= 
+            #                   name = " ".join(map(lambda z : z.capitalize(),_.split('_')))
+            #                   #print(name)
+            #                   res = res + line_indicator + name + ':'
+            #                   if _ != "parsing_errors":
+
+            #                       for j in range(len(check_results[_])):
+                                      
+            #                           res= res + line_indicator + (check_results[_][j]["check_name"])
+            #                       res = res +line_indicator+line
+            #                   else:
+            #                       for j in range(len(check_results[_])):
+                                      
+            #                           res= res + line_indicator + (check_results[_][j])
+            #                       res = res +line_indicator+line
+            #           print(type(res))
+
+            #       print(f"##vso[task.setvariable variable=GhComment;]{res}")
+
+
+              
             - task: PythonScript@0
               inputs:
                 scriptSource: 'inline'
                 script: |
                   import json
                   line = "-"*125
-                  line_indicator = '%0D%0A'
-                  
-                  with open('checkov-report.json') as f:
+                  divider = ' | '.join(["-"*18 for _ in range(6)])
+                  line_indicator = '\n'
+                  block_indicator="""```"""
+                  with open('data.json') as f:
                       data = json.load(f)
-                      res = 'line_indicator'
+                      res = line + line_indicator
                       for i in range(len(data)):
                           res = res + str('Check Type:     ' + data[i]["check_type"]).center(120)
-                          
+                  
                           xdata = data[i]["summary"]
-
-                          #Delete If didnt works
-                          # For If chekov fails cancel PR
-                          print(xdata)
-                          #End
+                  
+                          res = res + line_indicator + line + line_indicator + ' | '.join(xdata.keys()
+                                                                                        ) + line_indicator + divider + line_indicator + ' | '.join(map(str, xdata.values())) + line_indicator + line
+                          # print(res)
                           
-                          res = res + line_indicator+ line + line_indicator + '|'.join(map(lambda y: y.center(20), xdata.keys())
-                                              ) + line_indicator + line + line_indicator + '|'.join(map(lambda y: y.center(20),map(str,xdata.values()))) + line_indicator + line
-                          #print(res)
                           check_results = data[i]["results"]
                           for _ in check_results:
-                              #spilts_= 
-                              name = " ".join(map(lambda z : z.capitalize(),_.split('_')))
-                              #print(name)
+                              # spilts_=
+                              name = " ".join(map(lambda z: z.capitalize(), _.split('_')))
+                              # print(name)
+                              res= res + line_indicator + block_indicator 
+                  
                               res = res + line_indicator + name + ':'
                               if _ != "parsing_errors":
-
+                  
                                   for j in range(len(check_results[_])):
-                                      
-                                      res= res + line_indicator + (check_results[_][j]["check_name"])
-                                  res = res +line_indicator+line
+                  
+                                      res = res + line_indicator + \
+                                          (check_results[_][j]["check_name"])
+                                  res = res + line_indicator
                               else:
                                   for j in range(len(check_results[_])):
-                                      
-                                      res= res + line_indicator + (check_results[_][j])
-                                  res = res +line_indicator+line
-                      print(type(res))
-
-                  print(f"##vso[task.setvariable variable=GhComment;]{res}")
-              
-            
+                  
+                                      res = res + line_indicator + (check_results[_][j])
+                                  res = res + line_indicator
+                              res= res + line_indicator + block_indicator + line_indicator + line +line_indicator
+                          
+                      print(res)
+                    print(f"##vso[task.setvariable variable=GhComment;]{res}")
             - task: GitHubComment@0
               inputs:
                 gitHubConnection: 'github.com_checkov'
