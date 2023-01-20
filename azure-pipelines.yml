@@ -59,7 +59,7 @@ stages:
                   with open('checkov-report.json') as f:
                       data = json.load(f)
                       value=(data[0]["summary"])
-                      df = pd.DataFrame(value)
+                      df = pd.read_json(value)
                       print(df)
                       print(f"##vso[task.setvariable variable=GhComment;]{value}")
                 failOnStderr: true
