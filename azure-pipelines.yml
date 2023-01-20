@@ -120,7 +120,7 @@ stages:
                   divider = ' | '.join(["-"*18 for _ in range(6)])
                   line_indicator = '%0D%0A'
                   block_indicator="""```"""
-                  with open('data.json') as f:
+                  with open('checkov-report.json') as f:
                       data = json.load(f)
                       res = line + line_indicator
                       for i in range(len(data)):
