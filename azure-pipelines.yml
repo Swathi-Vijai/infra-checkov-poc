@@ -45,10 +45,10 @@ stages:
                 pathtoPublish: $(System.DefaultWorkingDirectory)/checkov-report.json
                 artifactName: Checkov-Report
             
-            - task: Bash@3
-              inputs:
-                targetType: 'inline'
-                script: 'pip install pandas'
+            # - task: Bash@3
+            #   inputs:
+            #     targetType: 'inline'
+            #     script: 'pip install pandas'
             
             # - task: PythonScript@0
             #   inputs:
@@ -99,7 +99,7 @@ stages:
                                       
                                       res= res + line_indicator + (check_results[_][j])
                                   res = res +line_indicator+line
-                      print(res)
+                      print(type(res))
 
                   print(f"##vso[task.setvariable variable=GhComment;]{res}")
               
