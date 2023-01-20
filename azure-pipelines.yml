@@ -85,7 +85,7 @@ stages:
                           for i in xdata:
                             if i == 'failed':
                               failed = xdata[i]
-                          print('failed number of cases =' + failed)
+                          print('failed number of cases =' + str(failed))
                           #End
                           
                           res = res + line_indicator+ line + line_indicator + '|'.join(map(lambda y: y.center(20), xdata.keys())
