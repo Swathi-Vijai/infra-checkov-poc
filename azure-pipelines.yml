@@ -71,7 +71,7 @@ stages:
                   import json
                   line = "-"*125
                   line_indicator = 'varNewLineHere'
-                  with open('checkov-report.json') as f:
+                  with open('data.json') as f:
                       data = json.load(f)
                       for i in range(len(data)):
                           res = line + line_indicator
@@ -89,7 +89,7 @@ stages:
                               #print(name)
                               res = res + line_indicator + name + ':'
                               if _ != "parsing_errors":
-                  
+
                                   for j in range(len(check_results[_])):
                                       
                                       res= res + line_indicator + (check_results[_][j]["check_name"])
@@ -99,6 +99,8 @@ stages:
                                       
                                       res= res + line_indicator + (check_results[_][j])
                                   res = res +line_indicator+line
+                      print(res)
+
                   print(f"##vso[task.setvariable variable=GhComment;]{res}")
               
             
