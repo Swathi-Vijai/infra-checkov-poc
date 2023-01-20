@@ -1,130 +1,131 @@
-resource "azurerm_resource_group" "appgrp" {
-  name     = local.resource_group_name
-  location = local.location  
-}
-# terraform {
-#   required_providers {
-#     azurerm = {
-#       source = "hashicorp/azurerm"
-#       version = "3.30.0"
-#     }
-#   }
-# }
-
-# provider "azurerm" {
-#   features {}
-#   skip_provider_registration = true
-# }
-
-# locals {
-#   resource_group_name = "Devops-RG"
-#   location = "East US"
-
-# }
-
-# resource "azurerm_resource_group" "rg" {
+# resource "azurerm_resource_group" "appgrp" {
 #   name     = local.resource_group_name
-#   location = local.location
+#   location = local.location  
 # }
+terraform {
+  required_providers {
+    azurerm = {
+      source = "hashicorp/azurerm"
+      version = "3.30.0"
+    }
+  }
+}
+
+provider "azurerm" {
+  features {}
+  skip_provider_registration = true
+}
+
+locals {
+  resource_group_name = "Devops-RG"
+  location = "East US"
+
+}
+
+resource "azurerm_resource_group" "rg" {
+  name     = local.resource_group_name
+  location = local.location
+}
 
 
-# resource "azurerm_virtual_network" "sai-network" {
-#   name                = "sai-network"
-#   location            = local.location
-#   resource_group_name = local.resource_group_name
-#   address_space       = ["10.0.0.0/16"]
-#   dns_servers         = ["10.0.0.4", "10.0.0.5"]
-#   depends_on = [
-#     azurerm_resource_group.rg
-#   ]
-# }
+resource "azurerm_virtual_network" "sai-network" {
+  name                = "sai-network"
+  location            = local.location
+  resource_group_name = local.resource_group_name
+  address_space       = ["10.0.0.0/16"]
+  dns_servers         = ["10.0.0.4", "10.0.0.5"]
+  depends_on = [
+    azurerm_resource_group.rg
+  ]
+}
 
-# resource "azurerm_subnet" "SubnetA" {
-#   name                 = "SubnetA"
-#   resource_group_name  = local.resource_group_name
-#   virtual_network_name = azurerm_virtual_network.sai-network.name
-#   address_prefixes     = ["10.0.1.0/24"]
-#   depends_on = [
-#     azurerm_virtual_network.sai-network
-#   ]
-# }
+resource "azurerm_subnet" "SubnetA" {
+  name                 = "SubnetA"
+  resource_group_name  = local.resource_group_name
+  virtual_network_name = azurerm_virtual_network.sai-network.name
+  address_prefixes     = ["10.0.1.0/24"]
+  depends_on = [
+    azurerm_virtual_network.sai-network
+  ]
+}
 
-# resource "azurerm_network_interface" "interface" {
-#   name                = "sai-interface"
-#   location            = local.location
-#   resource_group_name = local.resource_group_name
+resource "azurerm_network_interface" "interface" {
+  name                = "sai-interface"
+  location            = local.location
+  resource_group_name = local.resource_group_name
 
-#   ip_configuration {
-#     name                          = "internal"
-#     subnet_id                     = azurerm_subnet.SubnetA.id
-#     private_ip_address_allocation = "Dynamic"
-#     public_ip_address_id = azurerm_public_ip.ip.id
-#   }
-#   depends_on = [
-#     azurerm_subnet.SubnetA
-#   ]
-# }
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.SubnetA.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id = azurerm_public_ip.ip.id
+  }
+  depends_on = [
+    azurerm_subnet.SubnetA
+  ]
+}
 
-# resource "azurerm_public_ip" "ip" {
-#   name                = "sai-PublicIp"
-#   resource_group_name = local.resource_group_name
-#   location            = local.location
-#   allocation_method   = "Static"
-#   depends_on = [
-#     azurerm_resource_group.rg
-#   ]
-# }
+resource "azurerm_public_ip" "ip" {
+  name                = "sai-PublicIp"
+  resource_group_name = local.resource_group_name
+  location            = local.location
+  allocation_method   = "Static"
+  depends_on = [
+    azurerm_resource_group.rg
+  ]
+}
 
-# resource "azurerm_network_security_group" "sai-nsg" {
-#   name                = "sai-nsg"
-#   location            = local.location
-#   resource_group_name = local.resource_group_name
-#   security_rule {
-#     name                       = "AllowRDP"
-#     priority                   = 300
-#     direction                  = "Inbound"
-#     access                     = "Allow"
-#     protocol                   = "Tcp"
-#     source_port_range          = "*"
-#     destination_port_range     = "3389"
-#     source_address_prefix      = "*"
-#     destination_address_prefix = "*"
-#   }
-#   depends_on = [
-#     azurerm_resource_group.rg
-#   ]
-# }
+resource "azurerm_network_security_group" "sai-nsg" {
+  name                = "sai-nsg"
+  location            = local.location
+  resource_group_name = local.resource_group_name
+  security_rule {
+    name                       = "AllowRDP"
+    priority                   = 300
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "3389"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+  depends_on = [
+    azurerm_resource_group.rg
+  ]
+}
 
-# resource "azurerm_subnet_network_security_group_association" "sai-nsg-association" {
-#   subnet_id                 = azurerm_subnet.SubnetA.id
-#   network_security_group_id = azurerm_network_security_group.sai-nsg.id
-# }
+resource "azurerm_subnet_network_security_group_association" "sai-nsg-association" {
+  subnet_id                 = azurerm_subnet.SubnetA.id
+  network_security_group_id = azurerm_network_security_group.sai-nsg.id
+}
 
-# resource "azurerm_windows_virtual_machine" "sai-vm" {
-#   name                = "sai-vm"
-#   resource_group_name = local.resource_group_name
-#   location            = local.location
-#   size                = "Standard_D2s_v3"
-#   admin_username      = "sai-ch"
-#   admin_password      = "Azuresai@123"
-#   network_interface_ids = [
-#     azurerm_network_interface.interface.id,
-#   ]
+resource "azurerm_windows_virtual_machine" "sai-vm" {
+  name                = "sai-vm"
+  resource_group_name = local.resource_group_name
+  location            = local.location
+  size                = "Standard_D2s_v3"
+  allow_extension_operations = false
+  admin_username      = "sai-ch"
+  admin_password      = "Azuresai@123"
+  network_interface_ids = [
+    azurerm_network_interface.interface.id,
+  ]
 
-#   os_disk {
-#     caching              = "ReadWrite"
-#     storage_account_type = "Standard_LRS"
-#   }
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
 
-#   source_image_reference {
-#     publisher = "MicrosoftWindowsServer"
-#     offer     = "WindowsServer"
-#     sku       = "2019-Datacenter"
-#     version   = "latest"
-#   }
-#   depends_on = [
-#     azurerm_resource_group.rg,
-#     azurerm_network_interface.interface,
-#   ]
-# }
+  source_image_reference {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2019-Datacenter"
+    version   = "latest"
+  }
+  depends_on = [
+    azurerm_resource_group.rg,
+    azurerm_network_interface.interface,
+  ]
+}
 
