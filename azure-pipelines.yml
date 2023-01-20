@@ -155,7 +155,7 @@ stages:
                               res= res + line_indicator + block_indicator + line_indicator + line +line_indicator
                           
                       print(res)
-                    print(f"##vso[task.setvariable variable=GhComment;]{res}")
+                  print(f"##vso[task.setvariable variable=GhComment;]{res}")
             - task: GitHubComment@0
               inputs:
                 gitHubConnection: 'github.com_checkov'
