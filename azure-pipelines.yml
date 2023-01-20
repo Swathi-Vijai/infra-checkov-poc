@@ -82,10 +82,7 @@ stages:
 
                           #Delete If didnt works
                           # For If chekov fails cancel PR
-                          for i in xdata:
-                            if i == 'failed':
-                              failed = xdata[i]
-                          print('failed number of cases =' + str(failed))
+                          print(xdata)
                           #End
                           
                           res = res + line_indicator+ line + line_indicator + '|'.join(map(lambda y: y.center(20), xdata.keys())
