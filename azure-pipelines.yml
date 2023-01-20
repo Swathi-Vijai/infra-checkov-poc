@@ -118,7 +118,7 @@ stages:
                   import json
                   line = "-"*125
                   divider = ' | '.join(["-"*18 for _ in range(6)])
-                  line_indicator = '\n'
+                  line_indicator = '%0D%0A'
                   block_indicator="""```"""
                   with open('data.json') as f:
                       data = json.load(f)
