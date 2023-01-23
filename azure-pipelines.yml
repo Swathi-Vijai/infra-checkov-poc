@@ -29,7 +29,7 @@ stages:
               displayName: 'Removing exiting report'
               inputs:
                 targetType: 'inline'
-                script: 'rm checkov-report.*'
+                script: 'rm checkov-report.xml'
               continueOnError: true
             
             
@@ -38,9 +38,17 @@ stages:
               inputs:
                 targetType: 'inline'
                 script: |
+                  checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2) 
+                  checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2)
+              continueOnError: true 
+            
+            - task: Bash@3
+              displayName: 'Checkov Static Code Analysis'
+              inputs:
+                targetType: 'inline'
+                script: |
                   checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2) --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml
                   checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2) --output json > $(System.DefaultWorkingDirectory)/checkov-report.json
-              #continueOnError: true 
             
 
             
@@ -214,7 +222,6 @@ stages:
                 infracost comment github --path=/tmp/infracost.json \
                                   --repo=$(Build.Repository.Name) \
                                   --pull-request=$(System.PullRequest.PullRequestNumber) \
-                                  #--github-token=$(GITHUB-TOKEN) \
                                   --github-token=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 \
                                   --behavior=update
               displayName: Post Infracost comment
