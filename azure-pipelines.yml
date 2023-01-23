@@ -195,8 +195,7 @@ stages:
           steps:
             - task: InfracostSetup@1
               inputs:
-                apiKey: ico-JXS7HfnKuEmnMMkEpL4AEcS9ORhV1lYx
-                #apiKey: $(api_key)
+                apiKey: $(api_key)
                 version: '0.10.x'
 
             - bash: |
@@ -222,7 +221,7 @@ stages:
                 infracost comment github --path=/tmp/infracost.json \
                                   --repo=$(Build.Repository.Name) \
                                   --pull-request=$(System.PullRequest.PullRequestNumber) \
-                                  --github-token=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 \
+                                  --github-token=$(GITHUB-TOKEN) \
                                   --behavior=update
               displayName: Post Infracost comment
 
