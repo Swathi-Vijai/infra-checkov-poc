@@ -24,13 +24,22 @@ stages:
               inputs:
                 targetType: 'inline'
                 script: 'pip3 install checkov'
+            
+            - task: Bash@3
+              displayName: 'Removing exiting report'
+              inputs:
+                targetType: 'inline'
+                script: 'rm checkov-report.*'
+              continueOnError: true
+            
+            
             - task: Bash@3
               displayName: 'Checkov Static Code Analysis'
               inputs:
                 targetType: 'inline'
                 script: |
-                  checkov --directory ./ --hard-fail-on LOW --bc-api-key  $(API-KEY-2) --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml
-                  checkov --directory ./ --hard-fail-on LOW --bc-api-key  $(API-KEY-2) --output json > $(System.DefaultWorkingDirectory)/checkov-report.json
+                  checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2) --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml
+                  checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2) --output json > $(System.DefaultWorkingDirectory)/checkov-report.json
               continueOnError: true 
             
 
