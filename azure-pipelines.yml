@@ -175,13 +175,44 @@ stages:
                               res= res + line_indicator + block_indicator + line_indicator + line +line_indicator
                           
                       print(res)
+                  
                   print(f"##vso[task.setvariable variable=GhComment;]{res}")
+                  
+                  Failed_Severity=[]
+                  Restricted_Severity=["HIGH", "CRITICAL", "MEDIUM", "LOW"]
+                  with open('checkov-report.json') as f:
+                      data = json.load(f)
+                      for i in range(len(data)):
+                          check_results = data[i]["results"]
+                          failed_check=(check_results["failed_checks"])
+                          for j in range(len((check_results["failed_checks"]))):
+                              Failed_Severity.append(failed_check[j]["severity"])
+                  
+                  print(Failed_Severity)
+                  
+                  flag = 0
+                  for _ in Failed_Severity:
+                      if _ in Restricted_Severity:
+                          flag=1
+                          break
+                  print(f"##vso[task.setvariable variable=FlagFaileSeverity;]{flag}")
+
             - task: GitHubComment@0
               inputs:
                 gitHubConnection: 'github.com_checkov'
                 repositoryName: '$(Build.Repository.Name)'
                 id: '$(System.PullRequest.PullRequestNumber)'
                 comment: '$(GhComment)'
+            
+            - task: Bash@3
+              inputs:
+                targetType: 'inline'
+                script: |
+                  if [ $(FlagFaileSeverity) -eq 1 ]
+                  then
+                  exit 1
+                  fi
+                failOnStderr: true
 
  
   - stage: cost_estimation
