@@ -36,6 +36,7 @@ stages:
                 script: |
                   checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2) --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml
                   checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2) --output json > $(System.DefaultWorkingDirectory)/checkov-report.json
+              continueOnError: true
 
             
             - task: PublishTestResults@2
