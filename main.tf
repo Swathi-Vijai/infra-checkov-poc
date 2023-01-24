@@ -1,51 +1,112 @@
 terraform {
-  required_providers {
-    azurerm = {
-      source = "hashicorp/azurerm"
-      version = "3.30.0"
-    }
+
+  backend "azurerm" {
+
+    
+
   }
+
+
+
+
+  required_providers {
+
+    azurerm = {
+
+      source  = "hashicorp/azurerm"
+
+      version = "~>2.0"
+
+    }
+
+    random = {
+
+      source  = "hashicorp/random"
+
+      version = "~>3.0"
+
+    }
+
+    tls = {
+
+      source = "hashicorp/tls"
+
+      version = "~>4.0"
+
+    }
+
+  }
+
 }
+
+
+
 
 provider "azurerm" {
+
   features {}
-  skip_provider_registration = true
-}
 
-resource "azurerm_resource_group" "sai-rg" {
-    name = "Devops-RG"
-    location = "East US"
 }
 
 
-resource "azurerm_storage_account" "example" {
-  name                     = "sai-ch-storage"
-  resource_group_name      = "Devops-RG"
-  location                 = "East US"
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  account_kind = "BlobStorage"
-  depends_on = [
-    azurerm_resource_group.sai-rg
-  ]
+
+
+
+
+
+resource "azurerm_virtual_network" "secure_terraform_network" {
+
+  name                = "secureVnet"
+
+  address_space       = ["10.1.0.0/16"]
+
+  location            = var.rg_location
+
+  resource_group_name = var.rg_name
+
 }
 
-resource "azurerm_storage_container" "example" {
-  name                  = "data"
-  storage_account_name  = "sai-ch-storage"
-  container_access_type = "blob"
-  depends_on = [
-    azurerm_storage_account.example
-  ]
+
+
+
+# Create subnet
+
+resource "azurerm_subnet" "secure_terraform_subnet" {
+
+  name                 = "secureSubnet"
+
+  resource_group_name  = azurerm_virtual_network.secure_terraform_network.resource_group_name
+
+  virtual_network_name = azurerm_virtual_network.secure_terraform_network.name
+
+  address_prefixes     = ["10.1.1.0/24"]
+
 }
 
-resource "azurerm_storage_blob" "example" {
-  name                   = "main.tf"
-  storage_account_name   = "sai-ch-storage"
-  storage_container_name = "data"
-  type                   = "Block"
-  source                 = "main.tf"
-  depends_on = [
-    azurerm_storage_container.example
-  ]
+
+
+
+
+
+
+
+
+
+variable "rg_location" {}
+
+
+
+
+variable "rg_name" {}
+
+
+
+
+
+
+
+output "resource_group_name" {
+
+  value = azurerm_virtual_network.secure_terraform_network.resource_group_name
+
 }
