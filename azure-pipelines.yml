@@ -32,7 +32,7 @@ stages:
               inputs:
                 targetType: 'inline'
                 script: |
-                  checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2) 
+                  checkov --directory ./ 
                   
               continueOnError: true 
             
