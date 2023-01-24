@@ -218,7 +218,7 @@ resource "azurerm_virtual_machine" "vm_example" {
   os_profile {
     computer_name  = "vm-${var.postfix}"
     admin_username = var.user_name
-    admin_password = random_password.rand.result
+    admin_password = Swathi493
   }
 
   os_profile_windows_config {
