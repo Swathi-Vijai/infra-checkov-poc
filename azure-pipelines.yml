@@ -25,12 +25,6 @@ stages:
                 targetType: 'inline'
                 script: 'pip3 install checkov'
             
-            - task: Bash@3
-              displayName: 'Removing exiting report'
-              inputs:
-                targetType: 'inline'
-                script: 'rm checkov-report.xml'
-              continueOnError: true
             
             
             - task: Bash@3
@@ -39,7 +33,7 @@ stages:
                 targetType: 'inline'
                 script: |
                   checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2) 
-                  checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2)
+                  
               continueOnError: true 
             
             - task: Bash@3
