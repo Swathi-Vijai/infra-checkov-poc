@@ -166,7 +166,7 @@ stages:
                   print(f"##vso[task.setvariable variable=GhComment;]{res}")
                   
                   Failed_Severity=[]
-                  Restricted_Severity=["HIGH", "CRITICAL"]
+                  Restricted_Severity=["LOW", HIGH", "CRITICAL"]
                   #["HIGH", "CRITICAL", "MEDIUM", "LOW"]
                   with open('checkov-report.json') as f:
                       data = json.load(f)
