@@ -27,14 +27,7 @@ stages:
             
             
             
-            - task: Bash@3
-              displayName: 'Checkov Static Code Analysis'
-              inputs:
-                targetType: 'inline'
-                script: |
-                  checkov --directory ./ 
-                  
-              continueOnError: true 
+           
             
             - task: Bash@3
               displayName: 'Checkov Static Code Analysis'
@@ -43,7 +36,7 @@ stages:
                 script: |
                   checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2) --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml
                   checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2) --output json > $(System.DefaultWorkingDirectory)/checkov-report.json
-            
+                  checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2)
 
             
             - task: PublishTestResults@2
