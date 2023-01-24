@@ -4,10 +4,10 @@
 trigger: none
 pr:
   - main
+  - dev*
 
 pool:
   vmImage: ubuntu-latest
-
 
 
 stages:
