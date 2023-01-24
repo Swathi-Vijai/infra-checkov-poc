@@ -25,9 +25,6 @@ stages:
                 script: 'pip3 install checkov'
             
             
-            
-           
-            
             - task: Bash@3
               displayName: 'Checkov Static Code Analysis'
               inputs:
@@ -130,7 +127,7 @@ stages:
                       data = json.load(f)
                       res = line + line_indicator
                       for i in range(len(data)):
-                          res = res + str('Check Type:     ' + data[i]["check_type"]).center(120)
+                          res = res + str("Check Type:     " + data[i]["check_type"]).center(120)
                   
                           xdata = data[i]["summary"]
                   
