@@ -95,7 +95,7 @@
 # }
 # old
 
-
+/*
 # ---------------------------------------------------------------------------------------------------------------------
 # DEPLOY AN ADVANCED AZURE VIRTUAL MACHINE
 # This is an advanced example of how to deploy an Azure Virtual Machine in an availability set, managed disk 
@@ -263,7 +263,7 @@ resource "azurerm_virtual_machine_data_disk_attachment" "vm_disk" {
   caching            = "ReadWrite"
   lun                = 10
 }
-
+*/
 
 
 
