@@ -1,0 +1,254 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+trigger: none
+pr:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+
+stages:
+  - stage: checkov
+    jobs:
+        - job: compliance
+          displayName: 'Run checkov for compliance'
+          pool:
+            vmImage: 'ubuntu-latest'
+
+          steps:
+            
+            - task: Bash@3
+              inputs:
+                targetType: 'inline'
+                script: 'pip3 install checkov'
+            
+            
+            
+           
+            
+            - task: Bash@3
+              displayName: 'Checkov Static Code Analysis'
+              inputs:
+                targetType: 'inline'
+                script: |
+                  checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2) --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml
+                  checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2) --output json > $(System.DefaultWorkingDirectory)/checkov-report.json
+              continueOnError: true
+
+            
+            - task: PublishTestResults@2
+              displayName: 'Publish checkov Test Results'
+              condition: succeededOrFailed()
+              inputs:
+                testResultsFormat: 'JUnit'
+                testResultsFiles: 'checkov-report.xml'
+                searchFolder: '$(System.DefaultWorkingDirectory)'
+            
+            - task: PublishBuildArtifacts@1
+              inputs:
+                pathtoPublish: $(System.DefaultWorkingDirectory)/checkov-report.json
+                artifactName: Checkov-Report
+            
+            # - task: Bash@3
+            #   inputs:
+            #     targetType: 'inline'
+            #     script: 'pip install pandas'
+            
+            # - task: PythonScript@0
+            #   inputs:
+            #     scriptSource: 'inline'
+            #     script: |
+            #       import json
+            #       import pandas as pd
+            #       with open('checkov-report.json') as f:
+            #           data = json.load(f)
+            #           value=(data[0]["summary"])
+            #           df = pd.read_json(value)
+            #           print(df)
+            #           print(f"##vso[task.setvariable variable=GhComment;]{value}")
+            #     failOnStderr: true
+              
+            # - task: PythonScript@0
+            #   inputs:
+            #     scriptSource: 'inline'
+            #     script: |
+            #       import json
+            #       line = "-"*125
+            #       line_indicator = '%0D%0A'
+                  
+            #       with open('checkov-report.json') as f:
+            #           data = json.load(f)
+            #           res = line_indicator
+            #           for i in range(len(data)):
+            #               res = res + str('Check Type:     ' + data[i]["check_type"]).center(120)
+                          
+            #               xdata = data[i]["summary"]
+
+            #               #Delete If didnt works
+            #               # For If chekov fails cancel PR
+            #               print(xdata)
+            #               #End
+                          
+            #               res = res + line_indicator+ line + line_indicator + '|'.join(map(lambda y: y.center(20), xdata.keys())
+            #                                   ) + line_indicator + line + line_indicator + '|'.join(map(lambda y: y.center(20),map(str,xdata.values()))) + line_indicator + line
+            #               #print(res)
+            #               check_results = data[i]["results"]
+            #               for _ in check_results:
+            #                   #spilts_= 
+            #                   name = " ".join(map(lambda z : z.capitalize(),_.split('_')))
+            #                   #print(name)
+            #                   res = res + line_indicator + name + ':'
+            #                   if _ != "parsing_errors":
+
+            #                       for j in range(len(check_results[_])):
+                                      
+            #                           res= res + line_indicator + (check_results[_][j]["check_name"])
+            #                       res = res +line_indicator+line
+            #                   else:
+            #                       for j in range(len(check_results[_])):
+                                      
+            #                           res= res + line_indicator + (check_results[_][j])
+            #                       res = res +line_indicator+line
+            #           print(type(res))
+
+            #       print(f"##vso[task.setvariable variable=GhComment;]{res}")
+
+
+              
+            - task: PythonScript@0
+              inputs:
+                scriptSource: 'inline'
+                script: |
+                  import json
+                  line = "-"*125
+                  divider = ' | '.join(["-"*18 for _ in range(6)])
+                  line_indicator = '%0D%0A'
+                  block_indicator="""```"""
+                  with open('checkov-report.json') as f:
+                      data = json.load(f)
+                      res = line + line_indicator
+                      for i in range(len(data)):
+                          res = res + str('Check Type:     ' + data[i]["check_type"]).center(120)
+                  
+                          xdata = data[i]["summary"]
+                  
+                          res = res + line_indicator + line + line_indicator + ' | '.join(xdata.keys()
+                                                                                        ) + line_indicator + divider + line_indicator + ' | '.join(map(str, xdata.values())) + line_indicator + line
+                          # print(res)
+                          
+                          check_results = data[i]["results"]
+                          for _ in check_results:
+                              # spilts_=
+                              name = " ".join(map(lambda z: z.capitalize(), _.split('_')))
+                              # print(name)
+                              res= res + line_indicator + block_indicator 
+                  
+                              res = res + line_indicator + name + ':'
+                              if _ != "parsing_errors":
+                  
+                                  for j in range(len(check_results[_])):
+                  
+                                      res = res + line_indicator + \
+                                          (check_results[_][j]["severity"]) + " : " + (check_results[_][j]["check_name"])
+                                  res = res + line_indicator
+                              else:
+                                  for j in range(len(check_results[_])):
+                  
+                                      res = res + line_indicator + (check_results[_][j])
+                                  res = res + line_indicator
+                              res= res + line_indicator + block_indicator + line_indicator + line +line_indicator
+                          
+                      print(res)
+                  
+                  print(f"##vso[task.setvariable variable=GhComment;]{res}")
+                  
+                  Failed_Severity=[]
+                  Restricted_Severity=["HIGH", "CRITICAL"]
+                  #["HIGH", "CRITICAL", "MEDIUM", "LOW"]
+                  with open('checkov-report.json') as f:
+                      data = json.load(f)
+                      for i in range(len(data)):
+                          check_results = data[i]["results"]
+                          failed_check=(check_results["failed_checks"])
+                          for j in range(len((check_results["failed_checks"]))):
+                              Failed_Severity.append(failed_check[j]["severity"])
+                  
+                  print(Failed_Severity)
+                  
+                  flag = 0
+                  for _ in Failed_Severity:
+                      if _ in Restricted_Severity:
+                          flag=1
+                          break
+                  print(f"##vso[task.setvariable variable=FlagFaileSeverity;]{flag}")
+
+            - task: GitHubComment@0
+              inputs:
+                gitHubConnection: 'github.com_checkov'
+                repositoryName: '$(Build.Repository.Name)'
+                id: '$(System.PullRequest.PullRequestNumber)'
+                comment: '$(GhComment)'
+            
+            - task: Bash@3
+              inputs:
+                targetType: 'inline'
+                script: |
+                  if [ $(FlagFaileSeverity) -eq 1 ]
+                  then
+                  exit 1
+                  fi
+                failOnStderr: true
+
+ 
+  - stage: cost_estimation
+    dependsOn: checkov
+    jobs:
+        - job: 
+          displayName: 'infracost'
+          pool:
+            vmImage: 'ubuntu-latest'
+
+          steps:
+            - task: InfracostSetup@1
+              inputs:
+                apiKey: $(api_key)
+                version: '0.10.x'
+
+            - bash: |
+                branch=$(System.PullRequest.TargetBranch)
+                branch=main
+                git clone https://github.com/Swathi-Vijai/infra-checkov-poc.git --branch=${branch} /tmp/base
+              displayName: Checkout base branch
+
+            - bash: |
+                infracost breakdown --path="." \
+                                      --format=json \
+                                      --out-file=/tmp/infracost-base.json 
+              displayName: Generate Infracost cost estimate baseline
+            
+            - bash: |
+                infracost diff --path=$(TF_ROOT) \
+                         --format=json \
+                         --compare-to=/tmp/infracost-base.json \
+                         --out-file=/tmp/infracost.json
+              displayName: Generate Infracost diff
+            
+            - bash: |
+                infracost comment github --path=/tmp/infracost.json \
+                                  --repo=$(Build.Repository.Name) \
+                                  --pull-request=$(System.PullRequest.PullRequestNumber) \
+                                  --github-token=$(GITHUB-TOKEN) \
+                                  --behavior=update
+              displayName: Post Infracost comment
+
+            - task: PublishBuildArtifacts@1
+              inputs:
+                pathtoPublish: /tmp/infracost-base.json
+                artifactName: infracost-base-json
+
+  
+  
+  
+
