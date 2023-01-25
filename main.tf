@@ -92,12 +92,20 @@ resource "azurerm_subnet" "secure_terraform_subnet" {
 
 
 
-variable "rg_location" {}
+variable "rg_location" {
+  description = "The Azure location where to deploy your resources too"
+  type        = string
+  default     = "East US"
+}
 
 
 
 
-variable "rg_name" {}
+variable "rg_name" {
+  description = "The Azure rg_name where to deploy your resources too"
+  type        = string
+  default     = "Devops-RG"
+}
 
 
 
