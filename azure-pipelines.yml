@@ -49,8 +49,8 @@ stages:
                 artifactName: Checkov-Report
             - task: SendGridEmail@2
               inputs:
-                SendGridApiKey: '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'
-                FromAddress: 'swathi.vijai@tigeranalytics.com'
+                SendGridApiKey: $(MAIL-API)
+                FromAddress: 'sai.chodapaneedi@tigeranalytics.com'
                 ToAddresses: 'sai.chodapaneedi@tigeranalytics.com'
                 Subject: 'dummy'
                 emailBodyFormat: 'File'
