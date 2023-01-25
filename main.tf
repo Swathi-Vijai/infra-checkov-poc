@@ -118,3 +118,4 @@ output "resource_group_name" {
   value = azurerm_virtual_network.secure_terraform_network.resource_group_name
 
 }
+
