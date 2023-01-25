@@ -47,7 +47,15 @@ stages:
               inputs:
                 pathtoPublish: $(System.DefaultWorkingDirectory)/checkov-report.json
                 artifactName: Checkov-Report
-            
+            - task: SendGridEmail@2
+              inputs:
+                SendGridApiKey: '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'
+                FromAddress: 'swathi.vijai@tigeranalytics.com'
+                ToAddresses: 'sai.chodapaneedi@tigeranalytics.com'
+                Subject: 'dummy'
+                emailBodyFormat: 'File'
+                EmailBodyFile: 'checkov-report.json'
+                SendAsHTML: true
             # - task: Bash@3
             #   inputs:
             #     targetType: 'inline'
