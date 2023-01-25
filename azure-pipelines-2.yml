@@ -57,7 +57,7 @@ stages:
                   command: 'init'
                   backendAzureRmResourceGroupName: 'Devops-RG'
                   backendAzureRmStorageAccountName: 'devopstrainingstorage'
-                  backendAzureRmContainerName: 'test1-tfstate'
+                  backendAzureRmContainerName: 'swathi-tfstate-asgmt'
                   backendAzureRmKey: 'infra-checkov-test1.tfstate'
                   backendServiceArm: 'az-asgmts'
                   workingDirectory: $(System.DefaultWorkingDirectory)
