@@ -56,7 +56,6 @@ stages:
                 Subject: 'dummy'
                 emailBodyFormat: 'File'
                 EmailBodyFile: 'checkov-report.json'
-                SendAsHTML: true
             # - task: Bash@3
             #   inputs:
             #     targetType: 'inline'
