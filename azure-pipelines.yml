@@ -188,7 +188,7 @@ stages:
                 scriptSource: 'inline'
                 script: |
                   import json
-                  reading_file='data.json'
+                  reading_file='checkov-report.json'
                   writing_file='summary.json'
                   with open(writing_file, 'w') as report_file:
                       print("The empty json file is created")
@@ -277,7 +277,7 @@ stages:
               inputs:
                 SendGridApiKey: '$(MAIL-API)'
                 FromAddress: 'sai.chodapaneedi@tigeranalytics.com'
-                ToAddresses: 'sai.chodapaneedi@tigeranalytics.com, nvswathi2000@gmail.com'
+                ToAddresses: 'sai.chodapaneedi@tigeranalytics.com, nvswathi2000@gmail.com, mathivanan.nallu@tigeranalytics.com'
                 Subject: 'dummy'
                 emailBodyFormat: 'File'
                 EmailBodyFile: 'summary.json'
