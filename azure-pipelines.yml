@@ -301,7 +301,7 @@ stages:
 
             - bash: |
                 branch=$(System.PullRequest.TargetBranch)
-                branch=main
+                
                 git clone https://github.com/Swathi-Vijai/infra-checkov-poc.git --branch=${branch} /tmp/base
               displayName: Checkout base branch
 
