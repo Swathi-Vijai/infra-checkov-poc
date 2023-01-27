@@ -48,23 +48,8 @@ stages:
               inputs:
                 pathtoPublish: $(System.DefaultWorkingDirectory)/checkov-report.json
                 artifactName: Checkov-Report
-            - task: SendGridEmail@2
-              inputs:
-                SendGridApiKey: '$(MAIL-API)'
-                FromAddress: 'sai.chodapaneedi@tigeranalytics.com'
-                ToAddresses: 'sai.chodapaneedi@tigeranalytics.com, nvswathi2000@gmail.com'
-                Subject: 'dummy'
-                emailBodyFormat: 'File'
-                EmailBodyFile: 'checkov-report.json'
             
-            - task: SendGridEmail@2
-              inputs:
-                SendGridApiKey: '$(MAIL-API)'
-                FromAddress: 'sai.chodapaneedi@tigeranalytics.com'
-                ToAddresses: 'sai.chodapaneedi@tigeranalytics.com, nvswathi2000@gmail.com'
-                Subject: 'dummy'
-                emailBodyFormat: 'File'
-                EmailBodyFile: 'checkov-report.json'
+            
             # - task: Bash@3
             #   inputs:
             #     targetType: 'inline'
@@ -280,6 +265,15 @@ stages:
                           report_file.writelines(xdata)                                                              ) + line_indicator + divider + line_indicator + ' | '.join(map(str, xdata.values())) + line_indicator + line
                           print(res)
                   print(f"##vso[task.setvariable variable=GhComment;]{res}")
+            
+            - task: SendGridEmail@2
+              inputs:
+                SendGridApiKey: '$(MAIL-API)'
+                FromAddress: 'sai.chodapaneedi@tigeranalytics.com'
+                ToAddresses: 'sai.chodapaneedi@tigeranalytics.com, nvswathi2000@gmail.com'
+                Subject: 'dummy'
+                emailBodyFormat: 'File'
+                EmailBodyFile: 'summary.json'
             - task: GitHubComment@0
               inputs:
                 gitHubConnection: 'github.com_checkov'
