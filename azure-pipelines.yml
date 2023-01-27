@@ -188,13 +188,15 @@ stages:
                 scriptSource: 'inline'
                 script: |
                   import json
-                  with open('summary.json', 'w') as report_file:
+                  reading_file='data.json'
+                  writing_file='summary.json'
+                  with open(writing_file, 'w') as report_file:
                       print("The empty json file is created")
                       line = "-"*125
                       divider = ' | '.join(["-"*18 for _ in range(6)])
-                      line_indicator = '%0D%0A'
+                      line_indicator = '\n'
                       block_indicator = """```"""
-                      with open('checkov-report.json') as f:
+                      with open(reading_file) as f:
                           data = json.load(f)
                           res = line + line_indicator
                   
@@ -207,7 +209,6 @@ stages:
                   
                                   res = res + line_indicator + line + line_indicator + ' | '.join(xdata.keys()
                                                                                                   ) + line_indicator + divider + line_indicator + ' | '.join(map(str, xdata.values())) + line_indicator + line
-                                  summary = xdata
                                   report_file.write(json.dumps(xdata))
                                   # print(res)
                   
@@ -233,10 +234,10 @@ stages:
                                           Failed_Severity = []
                                           Restricted_Severity = ["HIGH", "CRITICAL"]
                                           #["HIGH", "CRITICAL", "MEDIUM", "LOW"]
-                                          with open('checkov-report.json') as f:
-                                              data = json.load(f)
-                                              for i in range(len(data)):
-                                                  check_results = data[i]["results"]
+                                          with open(reading_file) as f:
+                                              data_for_failed_checks = json.load(f)
+                                              for i in range(len(data_for_failed_checks)):
+                                                  check_results = data_for_failed_checks[i]["results"]
                                                   failed_check = (check_results["failed_checks"])
                                                   for j in range(len((check_results["failed_checks"]))):
                                                       Failed_Severity.append(
@@ -268,7 +269,6 @@ stages:
                               res = res + line_indicator + line + line_indicator + ' | '.join(xdata.keys()
                   
                                                                                               ) + line_indicator + divider + line_indicator + ' | '.join(map(str, xdata.values())) + line_indicator + line
-                              summary = xdata
                               report_file.write(json.dumps(xdata))
                               print(res)
                       print(f"##vso[task.setvariable variable=GhComment;]{res}")
