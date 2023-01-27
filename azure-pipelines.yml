@@ -189,82 +189,89 @@ stages:
                 script: |
                   import json
                   with open('summary.json', 'w') as report_file:
-                    print("The empty json file is created")
-                  line = "-"*125
-                  divider = ' | '.join(["-"*18 for _ in range(6)])
-                  line_indicator = '%0D%0A'
-                  block_indicator="""```"""
-                  with open('checkov-report.json') as f:
-                      data = json.load(f)
-                      res = line + line_indicator
-                      
-                      if type(data) == list :
-                          for i in range(len(data)):
-                              res = res + str('Check Type:     ' + data[i]["check_type"]).center(120)
+                      print("The empty json file is created")
+                      line = "-"*125
+                      divider = ' | '.join(["-"*18 for _ in range(6)])
+                      line_indicator = '%0D%0A'
+                      block_indicator = """```"""
+                      with open('checkov-report.json') as f:
+                          data = json.load(f)
+                          res = line + line_indicator
                   
-                              xdata = data[i]["summary"]
+                          if type(data) == list:
+                              for i in range(len(data)):
+                                  res = res + str('Check Type:     ' +
+                                                  data[i]["check_type"]).center(120)
                   
-                              res = res + line_indicator + line + line_indicator + ' | '.join(xdata.keys()
-                                                                                          ) + line_indicator + divider + line_indicator + ' | '.join(map(str, xdata.values())) + line_indicator + line
-                              summary = xdata
-                              report_file.writelines(xdata)                                                            
-                              # print(res)
-                              
-                              check_results = data[i]["results"]
-                              for _ in check_results:
-                                  # spilts_=
-                                  name = " ".join(map(lambda z: z.capitalize(), _.split('_')))
-                                  # print(name)
-                                  res= res + line_indicator + block_indicator 
+                                  xdata = data[i]["summary"]
                   
-                                  res = res + line_indicator + name + ':'
-                                  if _ != "parsing_errors":
+                                  res = res + line_indicator + line + line_indicator + ' | '.join(xdata.keys()
+                                                                                                  ) + line_indicator + divider + line_indicator + ' | '.join(map(str, xdata.values())) + line_indicator + line
+                                  summary = xdata
+                                  report_file.write(json.dumps(xdata))
+                                  # print(res)
                   
-                                      for j in range(len(check_results[_])):
+                                  check_results = data[i]["results"]
+                                  for _ in check_results:
+                                      # spilts_=
+                                      name = " ".join(map(lambda z: z.capitalize(), _.split('_')))
+                                      # print(name)
+                                      res = res + line_indicator + block_indicator
                   
-                                          res = res + line_indicator + \
-                                              str(check_results[_][j]["severity"]) + " : " + (check_results[_][j]["check_name"])
-                                          # print("=============")
-                                          # print(check_results[_][j]["severity"])
-                                          # print("==========================")
-                                      res = res + line_indicator
-                                      Failed_Severity=[]
-                                      Restricted_Severity=["HIGH", "CRITICAL"]
-                                      #["HIGH", "CRITICAL", "MEDIUM", "LOW"]
-                                      with open('checkov-report.json') as f:
-                                          data = json.load(f)
-                                          for i in range(len(data)):
-                                              check_results = data[i]["results"]
-                                              failed_check=(check_results["failed_checks"])
-                                              for j in range(len((check_results["failed_checks"]))):
-                                                  Failed_Severity.append(failed_check[j]["severity"])
-                                    
-                                      print(Failed_Severity)
-                                    
-                                      flag = 0
-                                      for _ in Failed_Severity:
-                                          if _ in Restricted_Severity:
-                                              flag=1
-                                              break
-                                      print(f"##vso[task.setvariable variable=FlagFaileSeverity;]{flag}")
-                                  else:
-                                      for j in range(len(check_results[_])):
-                                          
-                                          res = res + line_indicator + (check_results[_][j])
-                                      res = res + line_indicator
-                                  res= res + line_indicator + block_indicator + line_indicator + line +line_indicator
-                              
-                          print(res)
-                      else:
-                          res = res + str('Check Type:     ' + data["check_type"]).center(120)
+                                      res = res + line_indicator + name + ':'
+                                      if _ != "parsing_errors":
+                  
+                                          for j in range(len(check_results[_])):
+                  
+                                              res = res + line_indicator + \
+                                                  str(check_results[_][j]["severity"]) + \
+                                                  " : " + (check_results[_][j]["check_name"])
+                                              # print("=============")
+                                              # print(check_results[_][j]["severity"])
+                                              # print("==========================")
+                                          res = res + line_indicator
+                                          Failed_Severity = []
+                                          Restricted_Severity = ["HIGH", "CRITICAL"]
+                                          #["HIGH", "CRITICAL", "MEDIUM", "LOW"]
+                                          with open('checkov-report.json') as f:
+                                              data = json.load(f)
+                                              for i in range(len(data)):
+                                                  check_results = data[i]["results"]
+                                                  failed_check = (check_results["failed_checks"])
+                                                  for j in range(len((check_results["failed_checks"]))):
+                                                      Failed_Severity.append(
+                                                          failed_check[j]["severity"])
+                  
+                                          print(Failed_Severity)
+                  
+                                          flag = 0
+                                          for _ in Failed_Severity:
+                                              if _ in Restricted_Severity:
+                                                  flag = 1
+                                                  break
+                                          print(
+                                              f"##vso[task.setvariable variable=FlagFaileSeverity;]{flag}")
+                                      else:
+                                          for j in range(len(check_results[_])):
+                  
+                                              res = res + line_indicator + (check_results[_][j])
+                                          res = res + line_indicator
+                                      res = res + line_indicator + block_indicator + \
+                                          line_indicator + line + line_indicator
+                  
+                              print(res)
+                          else:
+                              res = res + str('Check Type:     ' + data["check_type"]).center(120)
                               #res = res + str('Check Type:     ' + data[i]["check_type"]).center(120)
-                          #print(res)
-                          xdata = data["summary"]
-                          res = res + line_indicator + line + line_indicator + ' | '.join(xdata.keys()
-                          summary = xdata
-                          report_file.writelines(xdata)                                                              ) + line_indicator + divider + line_indicator + ' | '.join(map(str, xdata.values())) + line_indicator + line
-                          print(res)
-                  print(f"##vso[task.setvariable variable=GhComment;]{res}")
+                              # print(res)
+                              xdata = data["summary"]
+                              res = res + line_indicator + line + line_indicator + ' | '.join(xdata.keys()
+                  
+                                                                                              ) + line_indicator + divider + line_indicator + ' | '.join(map(str, xdata.values())) + line_indicator + line
+                              summary = xdata
+                              report_file.write(json.dumps(xdata))
+                              print(res)
+                      print(f"##vso[task.setvariable variable=GhComment;]{res}")
             
             - task: SendGridEmail@2
               inputs:
