@@ -81,3 +81,4 @@ stages:
                   command: 'destroy'
                   #commandOptions: '--var-file="$(System.DefaultWorkingDirectory)/parameter.json"'
                   environmentServiceNameAzureRM: 'az-asgmts'
+
