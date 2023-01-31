@@ -52,8 +52,6 @@ provider "azurerm" {
 
 
 
-
-
 resource "azurerm_virtual_network" "secure_terraform_network" {
 
   name                = "secureVnet"
