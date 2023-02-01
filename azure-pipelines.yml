@@ -54,7 +54,7 @@ stages:
                 scriptSource: 'inline'
                 script: |
                   import json
-                  reading_file='checkov-report'
+                  reading_file='checkov-report.json'
                   writing_file='summary.json'
                   with open(writing_file, 'w') as report_file:
                       print("The empty json file is created")
