@@ -154,7 +154,7 @@ stages:
                 EmailBodyFile: 'summary.json'
             - task: GitHubComment@0
               inputs:
-                gitHubConnection: 'github.com_checkov'
+                gitHubConnection: 'github.com_checkov' # modify based on client
                 repositoryName: '$(Build.Repository.Name)'
                 id: '$(System.PullRequest.PullRequestNumber)'
                 comment: '$(GhComment)'
