@@ -195,11 +195,6 @@ stages:
                                       --format=json \
                                       --out-file=/tmp/infracost-base.json 
               displayName: Generate Infracost cost estimate baseline
-            - bash: |
-                infracost breakdown --path="." \
-                                      --format=xml \
-                                      --out-file=/tmp/infracost-base1.xml 
-              displayName: Generate Infracost cost estimate baseline
             
             
             
@@ -218,13 +213,7 @@ stages:
                                   --behavior=update
               displayName: Post Infracost comment
             
-            - task: PublishTestResults@2
-              displayName: 'Publish infracost Test Results'
-              condition: succeededOrFailed()
-              inputs:
-                testResultsFormat: 'JUnit'
-                testResultsFiles: 'infracost-base1.xml'
-                searchFolder: 'tmp'
+
 
             - task: PublishBuildArtifacts@1
               inputs:
