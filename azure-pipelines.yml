@@ -170,6 +170,49 @@ stages:
                 failOnStderr: true
 
  
+  - stage: Terratest
+    dependsOn: chekov
+    jobs:
+        - job: 
+          displayName: Terratest
+          pool: 
+            vmImage: ubuntu-latest
+          
+          steps:
+            - task: GoTool@0
+              inputs:
+                version: '1.19.4'
+
+            - task: CmdLine@2
+              inputs:
+                script: |
+                  export MY_VARIABLE="my value"
+                  export ARM_CLIENT_ID="$(ARM_CLIENT_ID)"
+                  export ARM_CLIENT_SECRET="$(ARM_CLIENT_SECRET)"
+                  export ARM_SUBSCRIPTION_ID="$(ARM_SUBSCRIPTION_ID)"
+                  export ARM_TENANT_ID="$(ARM_TENANT_ID)"
+                  echo "Environment Variables exported"
+                  echo "sub id"
+                  echo $ARM_SUBSCRIPTION_ID
+                  echo "tenant id"
+                  echo $ARM_TENANT_ID
+                  echo "client secret"
+                  echo $ARM_CLIENT_SECRET
+                  echo "client id"
+                  echo $ARM_CLIENT_ID
+                  echo "my variable"
+                  echo $MY_VARIABLE
+              displayName: 'Env variables setup'
+
+            - task: CmdLine@2
+              inputs:
+                script: |
+                  az login -u "$(username)" -p "$(password)" 
+                  cd test
+                  go mod init test
+                  go mod tidy
+                  go test -v
+              displayName: 'go test'
   - stage: cost_estimation
     dependsOn: checkov
     jobs:
