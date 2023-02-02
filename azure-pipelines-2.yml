@@ -32,6 +32,7 @@ stages:
             backendAzureRmKey: 'infra-checkov-test1.tfstate'
             backendServiceArm: 'az-asgmts'
             workingDirectory: $(System.DefaultWorkingDirectory)
+        # need to modify as generic
 
         - task: TerraformTaskV3@3
           displayName: 'Terraform Validate'

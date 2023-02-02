@@ -75,7 +75,11 @@ stages:
                   
                                   res = res + line_indicator + line + line_indicator + ' | '.join(xdata.keys()
                                                                                                   ) + line_indicator + divider + line_indicator + ' | '.join(map(str, xdata.values())) + line_indicator + line
+                                  report_file.write(str('Check Type:     ' +
+                                                  data[i]["check_type"]))
+                                  report_file.write('\n')
                                   report_file.write(json.dumps(xdata))
+                                  report_file.write('\n')
                                   # print(res)
                   
                                   check_results = data[i]["results"]
@@ -97,17 +101,25 @@ stages:
                                               # print(check_results[_][j]["severity"])
                                               # print("==========================")
                                           res = res + line_indicator
-                                          Failed_Severity = []
-                                          Restricted_Severity = ["HIGH", "CRITICAL"]
-                                          #["HIGH", "CRITICAL", "MEDIUM", "LOW"]
-                                          with open(reading_file) as f:
-                                              data_for_failed_checks = json.load(f)
-                                              for i in range(len(data_for_failed_checks)):
-                                                  check_results = data_for_failed_checks[i]["results"]
-                                                  failed_check = (check_results["failed_checks"])
-                                                  for j in range(len((check_results["failed_checks"]))):
-                                                      Failed_Severity.append(
-                                                          failed_check[j]["severity"])
+                                          
+                                      else:
+                                          for j in range(len(check_results[_])):
+                  
+                                              res = res + line_indicator + (check_results[_][j])
+                                          res = res + line_indicator
+                                      res = res + line_indicator + block_indicator + \
+                                          line_indicator + line + line_indicator
+                                  Failed_Severity = []
+                                  Restricted_Severity = ["HIGH", "CRITICAL"]
+                                  #["HIGH", "CRITICAL", "MEDIUM", "LOW"]
+                                  with open(reading_file) as f:
+                                      data_for_failed_checks = json.load(f)
+                                      for i in range(len(data_for_failed_checks)):
+                                          check_results = data_for_failed_checks[i]["results"]
+                                          failed_check = (check_results["failed_checks"])
+                                          for j in range(len((check_results["failed_checks"]))):
+                                              Failed_Severity.append(
+                                              failed_check[j]["severity"])
                   
                                           print(Failed_Severity)
                   
@@ -118,13 +130,6 @@ stages:
                                                   break
                                           print(
                                               f"##vso[task.setvariable variable=FlagFaileSeverity;]{flag}")
-                                      else:
-                                          for j in range(len(check_results[_])):
-                  
-                                              res = res + line_indicator + (check_results[_][j])
-                                          res = res + line_indicator
-                                      res = res + line_indicator + block_indicator + \
-                                          line_indicator + line + line_indicator
                   
                               print(res)
                           else:
@@ -149,7 +154,7 @@ stages:
                 EmailBodyFile: 'summary.json'
             - task: GitHubComment@0
               inputs:
-                gitHubConnection: 'github.com_checkov'
+                gitHubConnection: 'github.com_checkov' # modify based on client
                 repositoryName: '$(Build.Repository.Name)'
                 id: '$(System.PullRequest.PullRequestNumber)'
                 comment: '$(GhComment)'
@@ -190,6 +195,13 @@ stages:
                                       --format=json \
                                       --out-file=/tmp/infracost-base.json 
               displayName: Generate Infracost cost estimate baseline
+            - bash: |
+                infracost breakdown --path="." \
+                                      --format=xml \
+                                      --out-file=/tmp/infracost-base1.xml 
+              displayName: Generate Infracost cost estimate baseline
+            
+            
             
             - bash: |
                 infracost diff --path=$(TF_ROOT) \
@@ -205,6 +217,14 @@ stages:
                                   --github-token=$(GITHUB-TOKEN) \
                                   --behavior=update
               displayName: Post Infracost comment
+            
+            - task: PublishTestResults@2
+              displayName: 'Publish infracost Test Results'
+              condition: succeededOrFailed()
+              inputs:
+                testResultsFormat: 'JUnit'
+                testResultsFiles: 'infracost-base1.xml'
+                searchFolder: 'tmp'
 
             - task: PublishBuildArtifacts@1
               inputs:
