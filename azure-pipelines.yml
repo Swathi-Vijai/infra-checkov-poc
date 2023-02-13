@@ -1,9 +1,11 @@
 # Starter pipeline
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
-trigger: none
-pr:
-  - main
+trigger: 
+ branches:
+    include:
+      - main
+
 
 pool:
   vmImage: ubuntu-latest
@@ -31,9 +33,8 @@ stages:
                 targetType: 'inline'
                 # checkov command to display errors in 3 places- (json format-github pr comment), (xml format-azure pipeline test plans) and command without output format to display in pipeline runs
                 script: |
-                  checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2) --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml
-                  checkov --directory ./ --hard-fail-on MEDIUM --bc-api-key  $(API-KEY-2) --output json > $(System.DefaultWorkingDirectory)/checkov-report.json
-                  checkov --directory ./ --hard-fail-on MEDIUM
+                  checkov --directory ./ --hard-fail-on MEDIUM  --output junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml
+                  
               continueOnError: true
 
             
@@ -45,183 +46,74 @@ stages:
                 testResultsFiles: 'checkov-report.xml'
                 searchFolder: '$(System.DefaultWorkingDirectory)'
             
-            - task: PublishBuildArtifacts@1
-              inputs:
-                pathtoPublish: $(System.DefaultWorkingDirectory)/checkov-report.json
-                artifactName: Checkov-Report
             - task: PythonScript@0
               inputs:
                 scriptSource: 'inline'
                 script: |
-                  import json
-                  reading_file='checkov-report.json'
-                  writing_file='summary.json'
-                  with open(writing_file, 'w') as report_file:
-                      print("The empty json file is created")
-                      line = "-"*125
-                      divider = ' | '.join(["-"*18 for _ in range(6)])
-                      line_indicator = '%0D%0A'
-                      block_indicator = """```"""
-                      with open(reading_file) as f:
-                          data = json.load(f)
-                          res = line + line_indicator
-                  
-                          if type(data) == list:
-                              for i in range(len(data)):
-                                  res = res + str('Check Type:     ' +
-                                                  data[i]["check_type"]).center(120)
-                  
-                                  xdata = data[i]["summary"]
-                  
-                                  res = res + line_indicator + line + line_indicator + ' | '.join(xdata.keys()
-                                                                                                  ) + line_indicator + divider + line_indicator + ' | '.join(map(str, xdata.values())) + line_indicator + line
-                                  report_file.write(str('Check Type:     ' +
-                                                  data[i]["check_type"]))
-                                  report_file.write('\n')
-                                  report_file.write(json.dumps(xdata))
-                                  report_file.write('\n')
-                                  # print(res)
-                  
-                                  check_results = data[i]["results"]
-                                  for _ in check_results:
-                                      # spilts_=
-                                      name = " ".join(map(lambda z: z.capitalize(), _.split('_')))
-                                      # print(name)
-                                      res = res + line_indicator + block_indicator
-                  
-                                      res = res + line_indicator + name + ':'
-                                      if _ != "parsing_errors":
-                  
-                                          for j in range(len(check_results[_])):
-                  
-                                              res = res + line_indicator + \
-                                                  str(check_results[_][j]["severity"]) + \
-                                                  " : " + (check_results[_][j]["check_name"])
-                                              # print("=============")
-                                              # print(check_results[_][j]["severity"])
-                                              # print("==========================")
-                                          res = res + line_indicator
-                                          
-                                      else:
-                                          for j in range(len(check_results[_])):
-                  
-                                              res = res + line_indicator + (check_results[_][j])
-                                          res = res + line_indicator
-                                      res = res + line_indicator + block_indicator + \
-                                          line_indicator + line + line_indicator
-                                  Failed_Severity = []
-                                  Restricted_Severity = ["HIGH", "CRITICAL"]
-                                  #["HIGH", "CRITICAL", "MEDIUM", "LOW"]
-                                  with open(reading_file) as f:
-                                      data_for_failed_checks = json.load(f)
-                                      for i in range(len(data_for_failed_checks)):
-                                          check_results = data_for_failed_checks[i]["results"]
-                                          failed_check = (check_results["failed_checks"])
-                                          for j in range(len((check_results["failed_checks"]))):
-                                              Failed_Severity.append(
-                                              failed_check[j]["severity"])
-                  
-                                          print(Failed_Severity)
-                  
-                                          flag = 0
-                                          for _ in Failed_Severity:
-                                              if _ in Restricted_Severity:
-                                                  flag = 1
-                                                  break
-                                          print(
-                                              f"##vso[task.setvariable variable=FlagFaileSeverity;]{flag}")
-                  
-                              print(res)
-                          else:
-                              res = res + str('Check Type:     ' + data["check_type"]).center(120)
-                              #res = res + str('Check Type:     ' + data[i]["check_type"]).center(120)
-                              # print(res)
-                              xdata = data["summary"]
-                              res = res + line_indicator + line + line_indicator + ' | '.join(xdata.keys()
-                  
-                                                                                              ) + line_indicator + divider + line_indicator + ' | '.join(map(str, xdata.values())) + line_indicator + line
-                              report_file.write(json.dumps(xdata))
-                              print(res)
-                      print(f"##vso[task.setvariable variable=GhComment;]{res}")
-            
-            - task: SendGridEmail@2
-              inputs:
-                SendGridApiKey: '$(MAIL-API)'
-                FromAddress: 'sai.chodapaneedi@tigeranalytics.com'
-                ToAddresses: 'sai.chodapaneedi@tigeranalytics.com, nvswathi2000@gmail.com,'
-                Subject: 'dummy'
-                emailBodyFormat: 'File'
-                EmailBodyFile: 'summary.json'
-            - task: GitHubComment@0
-              inputs:
-                gitHubConnection: 'github.com_checkov' # modify based on client
-                repositoryName: '$(Build.Repository.Name)'
-                id: '$(System.PullRequest.PullRequestNumber)'
-                comment: '$(GhComment)'
-            
-            - task: Bash@3
-              inputs:
-                targetType: 'inline'
-                script: |
-                  if [ $(FlagFaileSeverity) -eq 1 ]
-                  then
-                  exit 1
-                  fi
-                failOnStderr: true
+                  f = open("test.txt", "a")
+                  import requests
+                  from bs4 import BeautifulSoup
+                  import xml.etree.ElementTree as ET
+                  tree= ET.parse('checkov-report.xml')
+                  root=tree.getroot()
+                  for child in root:
+                    c=0
+                    fi=0
+                    di=child.attrib
+                    f.write(str(di))
+                    f.write('\n')
+                    for i in range (1,len(child)):
+                      
+                      if(len(child[i]))==0:
+                        c=c+1
+                        if(c==1):
+                           print('passed checks:')
+                           f.write('PASSED CHECKS:')
+                           f.write('\n')
 
- 
-  - stage: cost_estimation
-    dependsOn: checkov
-    jobs:
-        - job: 
-          displayName: 'infracost'
-          pool:
-            vmImage: 'ubuntu-latest'
+                        d=child[i].attrib
+                        s=d['name']
+                        print(s[6:500])
+                        f.write(s[6:500])
+                        f.write('\n')
 
-          steps:
-            - task: InfracostSetup@1
-              inputs:
-                apiKey: $(api_key)
-                version: '0.10.x'
+                      else:
+                        fi=fi+1
+                        if(fi==1):
+                           print('failed checks:') 
+                           f.write('\n')
+                           f.write('FAILED CHECKS:')
+                           f.write('\n')
 
-            - bash: |
-                branch=$(System.PullRequest.TargetBranch)
-                
-                git clone https://github.com/Swathi-Vijai/infra-checkov-poc.git --branch=${branch} /tmp/base
-              displayName: Checkout base branch
+                        s=child[i][0].text
+                        l=s.split('\n')
+                        for x in l:
+                            if 'Guideline' in x:
+                                
+                                u=(x[10:1000])
+                                break
+                        r = requests.get(u)
+                        soup = BeautifulSoup(r.content, 'html.parser')
 
-            - bash: |
-                infracost breakdown --path="." \
-                                      --format=json \
-                                      --out-file=/tmp/infracost-base.json 
-              displayName: Generate Infracost cost estimate baseline
-            
-            
-            
-            - bash: |
-                infracost diff --path=$(TF_ROOT) \
-                         --format=json \
-                         --compare-to=/tmp/infracost-base.json \
-                         --out-file=/tmp/infracost.json
-              displayName: Generate Infracost diff
-            
-            - bash: |
-                infracost comment github --path=/tmp/infracost.json \
-                                  --repo=$(Build.Repository.Name) \
-                                  --pull-request=$(System.PullRequest.PullRequestNumber) \
-                                  --github-token=$(GITHUB-TOKEN) \
-                                  --behavior=update
-              displayName: Post Infracost comment
-            
+                        s = soup.find('div', class_='excerpt')
+                        
+                        lines = s.find_all('p')
+                        st=''
+                        for line in lines:
+                          st=st+(line.text)
+                        l=st.split('\n')
+                        for x in l:
+                            if 'Severity' in x:
+                                print(x[10:1000])
+                                f.write(x[10:1000])
 
-
+                        d=child[i].attrib
+                        s=d['name']
+                        print(s[6:500])
+                        f.write(s[6:500])
+                        f.write('\n')
+          
             - task: PublishBuildArtifacts@1
               inputs:
-                pathtoPublish: /tmp/infracost-base.json
-                artifactName: infracost-base-json
-
-  
-  
-  
-  
-
+                pathtoPublish: $(System.DefaultWorkingDirectory)/test.txt
+                artifactName: Checkov-Report
